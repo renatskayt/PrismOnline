@@ -53,6 +53,9 @@ class InstanceTask : public Task, public InstanceName {
 
     QString originalInstanceID() const { return m_original_instance_id; };
 
+    void setPrismOnlineKey(const QString& key) { m_prismOnlineKey = key; }
+    QString getPrismOnlineKey() const { return m_prismOnlineKey; }
+
    protected:
     void setOverride(bool override, QString instance_id_to_override = {})
     {
@@ -71,4 +74,5 @@ class InstanceTask : public Task, public InstanceName {
     bool m_confirm_update = true;
 
     QString m_original_instance_id;
+    QString m_prismOnlineKey;
 };

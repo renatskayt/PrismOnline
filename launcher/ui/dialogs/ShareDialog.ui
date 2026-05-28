@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ShareDialog</class>
+ <widget class="QDialog" name="ShareDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>520</width>
+    <height>480</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>PrismOnline — Pack Sharing</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="labelTitle">
+     <property name="text">
+      <string>&lt;b&gt;Pack Sharing System&lt;/b&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="shareGroup">
+     <property name="title">
+      <string>Share Pack</string>
+     </property>
+     <layout class="QVBoxLayout" name="shareLayout">
+      <item>
+       <widget class="QComboBox" name="instanceCombo"/>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="shareButtonsLayout">
+        <item>
+         <widget class="QPushButton" name="shareButton">
+          <property name="text">
+           <string>Share Pack</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="updateButton">
+          <property name="text">
+           <string>Push Update to Server</string>
+          </property>
+          <property name="toolTip">
+           <string>Update an existing shared pack on the server (requires PrismOnline key)</string>
+          </property>
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="downloadGroup">
+     <property name="title">
+      <string>Download Pack</string>
+     </property>
+     <layout class="QVBoxLayout" name="downloadLayout">
+      <item>
+       <widget class="QLineEdit" name="keyEdit">
+        <property name="placeholderText">
+         <string>Enter key (e.g. SKAYT-XXXX-XXXX)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="downloadButton">
+        <property name="text">
+         <string>Download &amp; Import</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="statusLabel">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="visible">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

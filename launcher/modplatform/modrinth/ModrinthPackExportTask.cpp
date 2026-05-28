@@ -42,7 +42,8 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                bool optionalFiles,
                                                BaseInstance* instance,
                                                const QString& output,
-                                               MMCZip::FilterFileFunction filter)
+                                               MMCZip::FilterFileFunction filter,
+                                               bool forceOverrides)
     : name(name)
     , version(version)
     , summary(summary)
@@ -52,13 +53,23 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
     , gameRoot(instance->gameRoot())
     , output(output)
     , filter(filter)
+    , forceOverrides(forceOverrides)
 {}
 
 void ModrinthPackExportTask::executeTask()
 {
     setStatus(tr("Searching for files..."));
     setProgress(0, 0);
-    collectFiles();
+    if (forceOverrides) {
+        files.clear();
+        if (!MMCZip::collectFileListRecursively(instance->gameRoot(), nullptr, &files, filter)) {
+            emitFailed(tr("Could not search for files"));
+            return;
+        }
+        buildZip();
+    } else {
+        collectFiles();
+    }
 }
 
 bool ModrinthPackExportTask::abort()
