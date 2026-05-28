@@ -168,6 +168,10 @@ class BaseInstance : public QObject {
     void setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version);
     void copyManagedPack(BaseInstance& other);
 
+    bool isPrismOnlinePack() const;
+    QString getPrismOnlineKey() const;
+    void setPrismOnlineKey(const QString& key);
+
     virtual QStringList extraArguments();
 
     /// Traits. Normally inside the version, depends on instance implementation.

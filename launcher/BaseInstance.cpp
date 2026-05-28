@@ -42,6 +42,7 @@
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSettings>
 
 #include "Application.h"
 #include "Json.h"
@@ -124,6 +125,20 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
     m_settings->registerSetting("ManagedPackVersionID", "");
     m_settings->registerSetting("ManagedPackVersionName", "");
     m_settings->registerSetting("ManagedPackURL", "");
+    m_settings->registerSetting("PrismOnlineKey", "");
+
+    // Migration: rescue PrismOnlineKey that may have been placed in [UI] section
+    if (m_settings->get("PrismOnlineKey").toString().isEmpty()) {
+        QString cfgPath = FS::PathCombine(rootDir, "instance.cfg");
+        QSettings rawCfg(cfgPath, QSettings::IniFormat);
+        rawCfg.setFallbacksEnabled(false);
+        QString migratedKey = rawCfg.value("UI/PrismOnlineKey").toString();
+        if (!migratedKey.isEmpty()) {
+            m_settings->set("PrismOnlineKey", migratedKey);
+            rawCfg.remove("UI/PrismOnlineKey");
+            rawCfg.sync();
+        }
+    }
 
     m_settings->registerSetting("Profiler", "");
 }
@@ -189,6 +204,21 @@ void BaseInstance::setManagedPack(const QString& type,
     m_settings->set("ManagedPackVersionName", version);
 }
 
+bool BaseInstance::isPrismOnlinePack() const
+{
+    return !getPrismOnlineKey().isEmpty();
+}
+
+QString BaseInstance::getPrismOnlineKey() const
+{
+    return m_settings->get("PrismOnlineKey").toString();
+}
+
+void BaseInstance::setPrismOnlineKey(const QString& key)
+{
+    m_settings->set("PrismOnlineKey", key);
+}
+
 void BaseInstance::copyManagedPack(BaseInstance& other)
 {
     m_settings->set("ManagedPack", other.isManagedPack());
@@ -197,6 +227,7 @@ void BaseInstance::copyManagedPack(BaseInstance& other)
     m_settings->set("ManagedPackName", other.getManagedPackName());
     m_settings->set("ManagedPackVersionID", other.getManagedPackVersionID());
     m_settings->set("ManagedPackVersionName", other.getManagedPackVersionName());
+    m_settings->set("PrismOnlineKey", other.getPrismOnlineKey());
 
     if (APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() && m_settings->get("AutomaticJava").toBool() &&
         m_settings->get("OverrideJavaLocation").toBool()) {
