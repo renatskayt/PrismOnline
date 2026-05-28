@@ -42,7 +42,8 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                bool optionalFiles,
                                                BaseInstance* instance,
                                                const QString& output,
-                                               MMCZip::FilterFileFunction filter)
+                                               MMCZip::FilterFileFunction filter,
+                                               bool forceOverrides)
     : name(name)
     , version(version)
     , summary(summary)
@@ -52,13 +53,45 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
     , gameRoot(instance->gameRoot())
     , output(output)
     , filter(filter)
+    , forceOverrides(forceOverrides)
 {}
 
 void ModrinthPackExportTask::executeTask()
 {
     setStatus(tr("Searching for files..."));
     setProgress(0, 0);
-    collectFiles();
+    if (forceOverrides) {
+        files.clear();
+        auto gameRootPath = instance->gameRoot();
+        auto localFilter = [gameRootPath](const QFileInfo& fileInfo) -> bool {
+            QDir gameRootDir(gameRootPath);
+            QString relative = gameRootDir.relativeFilePath(fileInfo.absoluteFilePath());
+            
+            if (relative.startsWith("saves/") || relative == "saves" ||
+                relative.startsWith("screenshots/") || relative == "screenshots" ||
+                relative.startsWith("logs/") || relative == "logs" ||
+                relative.startsWith("crash-reports/") || relative == "crash-reports" ||
+                relative.startsWith(".cache/") || relative == ".cache" ||
+                relative.startsWith(".fabric/") || relative == ".fabric" ||
+                relative.startsWith(".quilt/") || relative == ".quilt") {
+                return true;
+            }
+            
+            if (relative == "options.txt" || relative == "optionsof.txt" || relative == "usernamecache.json") {
+                return true;
+            }
+            
+            return false;
+        };
+
+        if (!MMCZip::collectFileListRecursively(instance->gameRoot(), nullptr, &files, localFilter)) {
+            emitFailed(tr("Could not search for files"));
+            return;
+        }
+        buildZip();
+    } else {
+        collectFiles();
+    }
 }
 
 bool ModrinthPackExportTask::abort()

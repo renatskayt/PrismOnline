@@ -1,0 +1,6 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>translations/prismonline_ru.po</file>
+    </qresource>
+</RCC>
