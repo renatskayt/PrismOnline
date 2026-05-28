@@ -62,3 +62,14 @@ flatbuild
 
 # Snap
 *.snap
+
+# PrismOnline Custom Rules
+/server/
+/PrismOnline-Linux.zip
+/PrismOnline-Linux/
+/PrismOnline-Windows.zip
+/PrismOnline-Windows/
+/PrismOnline.desktop
+/aqtinstall.log
+/session-*.md
+/mingw64/

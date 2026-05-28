@@ -91,11 +91,10 @@ void LaunchController::decideAccount()
         m_accountToUse = accounts->at(instanceAccountIndex);
     }
 
-    if (!accounts->anyAccountIsValid()) {
-        // Tell the user they need to log in at least one account in order to play.
+    if (accounts->count() == 0) {
+        // Tell the user they need to add at least one account in order to play.
         auto reply = CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
-                                                  tr("In order to play Minecraft, you must have at least one Microsoft "
-                                                     "account which owns Minecraft logged in. "
+                                                  tr("You need at least one account to play. "
                                                      "Would you like to open the account manager to add an account now?"),
                                                   QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)
                          ->exec();
@@ -109,7 +108,7 @@ void LaunchController::decideAccount()
         }
     }
 
-    if (!m_accountToUse && accounts->anyAccountIsValid()) {
+    if (!m_accountToUse && accounts->count() > 0) {
         // If no default account is set, ask the user which one to use.
         ProfileSelectDialog selectDialog(tr("Which account would you like to use?"), ProfileSelectDialog::GlobalDefaultCheckbox,
                                          m_parentWidget);
@@ -140,9 +139,11 @@ LaunchDecision LaunchController::decideLaunchMode()
         accountToCheck = m_accountToUse->ownsMinecraft() ? m_accountToUse : nullptr;
     } else if (const auto defaultAccount = accounts->defaultAccount(); defaultAccount && defaultAccount->ownsMinecraft()) {
         accountToCheck = defaultAccount;
+    } else if (const auto defaultOffline = accounts->defaultAccount(); defaultOffline && defaultOffline->accountType() == AccountType::Offline) {
+        accountToCheck = defaultOffline;
     } else {
         for (int i = 0; i < accounts->count(); i++) {
-            if (const auto account = accounts->at(i); account->ownsMinecraft()) {
+            if (const auto account = accounts->at(i); account->ownsMinecraft() || account->accountType() == AccountType::Offline) {
                 accountToCheck = account;
                 break;
             }
