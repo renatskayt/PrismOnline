@@ -37,7 +37,7 @@ bool vulkanInfo(QStringList& out)
              .isEmpty()) {
         return false;
     }
-#ifndef Q_OS_MACOS
+#if !defined(Q_OS_MACOS) && defined(VK_VERSION_1_0)
     QVulkanInstance inst;
     if (!inst.create()) {
         qWarning() << "Vulkan instance creation failed, VkResult:" << inst.errorCode();

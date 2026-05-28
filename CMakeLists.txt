@@ -85,9 +85,14 @@ else()
         add_link_options("$<$<COMPILE_LANGUAGE:C,CXX>:-Wl,--stack,8388608>")
 
         # -ffunction-sections and -fdata-sections help reduce binary size
-        # -mguard=cf enables Control Flow Guard
         # TODO: Look into -gc-sections to further reduce binary size
-        add_compile_options("$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:-ffunction-sections;-fdata-sections;-mguard=cf>")
+        add_compile_options("$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:-ffunction-sections;-fdata-sections>")
+
+        # When cross-compiling for Windows with MinGW, ensure MinGW headers
+        # take priority over host Linux headers (stdint.h etc.)
+        if(CMAKE_CROSSCOMPILING)
+            include_directories(BEFORE "/usr/x86_64-w64-mingw32/include")
+        endif()
     endif()
 endif()
 
@@ -195,10 +200,15 @@ set(Launcher_VERSION_NAME4_COMMA "${Launcher_VERSION_MAJOR},${Launcher_VERSION_M
 set(Launcher_BUILD_PLATFORM "unknown" CACHE STRING "A short string identifying the platform that this build was built for. Only used to display in the about dialog.")
 
 # Github repo URL with releases for updater
-set(Launcher_UPDATER_GITHUB_REPO "https://github.com/PrismLauncher/PrismLauncher" CACHE STRING "Base github URL for the updater.")
+set(Launcher_UPDATER_GITHUB_REPO "https://github.com/renatskayt/PrismOnline" CACHE STRING "Base github URL for the updater.")
 
 # Name to help updater identify valid artifacts
-set(Launcher_BUILD_ARTIFACT "" CACHE STRING "Artifact name to help the updater identify valid artifacts.")
+if(WIN32)
+    set(Launcher_BUILD_ARTIFACT_DEFAULT "windows-mingw")
+else()
+    set(Launcher_BUILD_ARTIFACT_DEFAULT "linux-x86_64")
+endif()
+set(Launcher_BUILD_ARTIFACT "${Launcher_BUILD_ARTIFACT_DEFAULT}" CACHE STRING "Artifact name to help the updater identify valid artifacts.")
 
 # The metadata server
 set(Launcher_META_URL "https://meta.prismlauncher.org/v1/" CACHE STRING "URL to fetch Launcher's meta files from.")
@@ -207,7 +217,7 @@ set(Launcher_META_URL "https://meta.prismlauncher.org/v1/" CACHE STRING "URL to 
 set(Launcher_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can get from Imgur when you register an application")
 
 # Bug tracker URL
-set(Launcher_BUG_TRACKER_URL "https://github.com/PrismLauncher/PrismLauncher/issues" CACHE STRING "URL for the bug tracker.")
+set(Launcher_BUG_TRACKER_URL "https://github.com/renatskayt/PrismOnline/issues" CACHE STRING "URL for the bug tracker.")
 
 # Translations Platform URL
 set(Launcher_TRANSLATIONS_URL "https://hosted.weblate.org/projects/prismlauncher/launcher/" CACHE STRING "URL for the translations platform.")
@@ -229,13 +239,6 @@ option(Launcher_USE_PCH "Use precompiled headers where possible" ON)
 
 # Java downloader
 set(Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT ON)
-
-# Although we recommend enabling this, we cannot guarantee binary compatibility on
-# differing Linux/BSD/etc distributions. Downstream packagers should be explicitly opt-ing into this
-# feature if they know it will work with their distribution.
-if(UNIX AND NOT APPLE)
-    set(Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT OFF)
-endif()
 
 # Java downloader
 option(Launcher_ENABLE_JAVA_DOWNLOADER "Build the java downloader feature" ${Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT})
@@ -309,7 +312,7 @@ find_package(cmark REQUIRED)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(gamemode REQUIRED IMPORTED_TARGET gamemode)
+    pkg_check_modules(gamemode QUIET IMPORTED_TARGET gamemode)
 endif()
 
 # Find libqrencode
@@ -346,7 +349,7 @@ include(ECMQtDeclareLoggingCategory)
 
 ####################################### Program Info #######################################
 
-set(Launcher_APP_BINARY_NAME "prismlauncher" CACHE STRING "Name of the Launcher binary")
+set(Launcher_APP_BINARY_NAME "prismonline" CACHE STRING "Name of the Launcher binary")
 add_subdirectory(program_info)
 
 ####################################### Install layout #######################################
@@ -440,7 +443,7 @@ if(UNIX AND APPLE)
     endif()
 
 
-elseif(UNIX)
+elseif(UNIX AND NOT WIN32)
     include(KDEInstallDirs)
 
     set(BINARY_DEST_DIR "bin")

@@ -578,9 +578,25 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     {
+        // First try migrating from Prism Launcher (most likely source)
         auto migrated = handleDataMigration(
-            dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../PolyMC"), "PolyMC",
-            "polymc.cfg");
+            dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../PrismLauncher"), "PrismLauncher",
+            "prismlauncher.cfg");
+#if defined(Q_OS_LINUX)
+        // Also try migrating from Flatpak Prism Launcher if the standard path didn't work
+        if (!migrated) {
+            migrated = handleDataMigration(
+                dataPath, QDir::homePath() + "/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher", "PrismLauncher (Flatpak)",
+                "prismlauncher.cfg");
+        }
+#endif
+        // Then try PolyMC
+        if (!migrated) {
+            migrated = handleDataMigration(
+                dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../PolyMC"), "PolyMC",
+                "polymc.cfg");
+        }
+        // Finally try MultiMC
         if (!migrated) {
             handleDataMigration(dataPath,
                                 FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../multimc"),
@@ -635,8 +651,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     // Initialize application settings
     {
-        // Provide a fallback for migration from PolyMC
-        m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this));
+        // Provide a fallback for migration from PrismLauncher, PolyMC, MultiMC
+        m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "prismlauncher.cfg", "polymc.cfg", "multimc.cfg" }, this));
 
         // Theming
         m_settings->registerSetting("IconTheme", QString());
@@ -893,6 +909,12 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("FallbackMRBlockedMods", true);
         m_settings->registerSetting("ModrinthToken", "");
         m_settings->registerSetting("UserAgentOverride", "");
+
+        // PrismOnline Share Server URL
+        m_settings->registerSetting("ShareServerURL", "https://prismonline.shares.zrok.io");
+        if (m_settings->get("ShareServerURL").toString() == "https://share.prismonline.ru") {
+            m_settings->set("ShareServerURL", "https://prismonline.shares.zrok.io");
+        }
 
         // FTBApp instances
         m_settings->registerSetting("FTBAppInstancesPath", "");
@@ -1226,9 +1248,8 @@ bool Application::createSetupWizard()
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
     bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
     bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
-    bool login = !m_accounts->anyAccountIsValid() && capabilities() & Application::SupportsMSA;
     bool themeInterventionRequired = !validWidgets || !validIcons;
-    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
+    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava;
     if (wizardRequired) {
         // set default theme after going into theme wizard
         if (!validIcons)
@@ -1265,14 +1286,11 @@ bool Application::createSetupWizard()
             m_setupWizard->addPage(new ThemeWizardPage(m_setupWizard));
         }
 
-        if (login) {
-            m_setupWizard->addPage(new LoginWizardPage(m_setupWizard));
-        }
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();
     }
 
-    return wizardRequired || login;
+    return wizardRequired;
 }
 
 bool Application::updaterEnabled()
