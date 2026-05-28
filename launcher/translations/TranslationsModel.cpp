@@ -173,6 +173,7 @@ struct TranslationsModel::Private {
     QFileSystemWatcher* watcher = nullptr;
 
     bool m_noLanguageSet = false;
+    std::unique_ptr<QTranslator> m_customTranslator;
 };
 
 TranslationsModel::TranslationsModel(const QString& path, QObject* parent) : QAbstractListModel(parent)
@@ -469,6 +470,10 @@ bool TranslationsModel::selectLanguage(QString key) const
         QCoreApplication::removeTranslator(d->m_qtTranslator.get());
         d->m_qtTranslator.reset();
     }
+    if (d->m_customTranslator) {
+        QCoreApplication::removeTranslator(d->m_customTranslator.get());
+        d->m_customTranslator.reset();
+    }
 
     /*
      * FIXME: potential source of crashes:
@@ -530,6 +535,20 @@ bool TranslationsModel::selectLanguage(QString key) const
     } else {
         d->m_appTranslator.reset();
     }
+
+    // Load custom translations from resources if Russian is selected
+    if (langCode.startsWith("ru")) {
+        d->m_customTranslator = std::make_unique<POTranslator>(":/translations/prismonline_ru.po");
+        if (!d->m_customTranslator->isEmpty()) {
+            if (!QCoreApplication::installTranslator(d->m_customTranslator.get())) {
+                qCritical() << "Installing Custom Application Language File failed.";
+                d->m_customTranslator.reset();
+            }
+        } else {
+            d->m_customTranslator.reset();
+        }
+    }
+
     d->m_selectedLanguage = langCode;
     return successful;
 }

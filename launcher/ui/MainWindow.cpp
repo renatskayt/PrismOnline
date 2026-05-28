@@ -100,6 +100,7 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ExportPackDialog.h"
+#include "ui/dialogs/ShareDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
@@ -132,6 +133,11 @@
 #include "InstanceDirUpdate.h"
 
 #include "Json.h"
+#include "InstanceImportTask.h"
+
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QTemporaryFile>
 
 #include "MMCTime.h"
 
@@ -546,6 +552,13 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
 
         actions.prepend(ui->actionChangeInstIcon);
         actions.prepend(ui->actionRenameInstance);
+
+        // PrismOnline: add "Update Pack" if instance has a key
+        if (m_selectedInstance && m_selectedInstance->isPrismOnlinePack()) {
+            QAction* actionUpdatePack = new QAction(tr("🔄 Update Pack"), this);
+            connect(actionUpdatePack, &QAction::triggered, this, &MainWindow::updatePrismOnlinePack);
+            actions.append(actionUpdatePack);
+        }
 
         // add header
         actions.prepend(actionSep);
@@ -1532,6 +1545,134 @@ void MainWindow::on_actionExportInstanceZip_triggered()
         ExportInstanceDialog dlg(m_selectedInstance, this);
         dlg.exec();
     }
+}
+
+void MainWindow::on_actionShare_triggered()
+{
+    ShareDialog dlg(this);
+    dlg.exec();
+}
+
+void MainWindow::updatePrismOnlinePack()
+{
+    if (!m_selectedInstance || !m_selectedInstance->isPrismOnlinePack()) {
+        return;
+    }
+
+    QString key = m_selectedInstance->getPrismOnlineKey();
+    QString oldName = m_selectedInstance->name();
+    QString oldIcon = m_selectedInstance->iconKey();
+
+    auto answer = QMessageBox::question(
+        this,
+        tr("Update Pack"),
+        tr("Update pack \"%1\"?\n\n"
+           "Key: %2\n\n"
+           "Current Minecraft data (mods, worlds, configs) will be replaced with the server version.\n"
+           "Save important worlds before updating!")
+            .arg(oldName, key),
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
+
+    if (answer != QMessageBox::Yes) {
+        return;
+    }
+
+    // Download from server
+    QString serverUrl = APPLICATION->settings()->get("ShareServerURL").toString();
+    QUrl url(serverUrl + "/api/share/" + key);
+    QNetworkRequest req(url);
+    req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false);
+
+    auto* nam = new QNetworkAccessManager(this);
+    QNetworkReply* reply = nam->get(req);
+
+    QProgressDialog progress(tr("Downloading updated pack..."), tr("Cancel"), 0, 100, this);
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setMinimumDuration(0);
+
+    connect(reply, &QNetworkReply::downloadProgress, &progress, [&progress](qint64 received, qint64 total) {
+        if (total > 0) {
+            progress.setMaximum(total);
+            progress.setValue(received);
+        } else {
+            progress.setMaximum(0);
+        }
+    });
+
+    connect(&progress, &QProgressDialog::canceled, reply, &QNetworkReply::abort);
+
+    // Wait for download
+    QEventLoop loop;
+    connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        QString msg;
+        if (reply->error() == QNetworkReply::ContentNotFoundError) {
+            msg = tr("Pack not found on server. The key may have expired.");
+        } else if (reply->error() == QNetworkReply::OperationCanceledError) {
+            msg = tr("Download cancelled.");
+        } else {
+            msg = tr("Download error:\n%1").arg(reply->errorString());
+        }
+        QMessageBox::warning(this, tr("Update Error"), msg);
+        reply->deleteLater();
+        nam->deleteLater();
+        return;
+    }
+
+    // Read headers for name/icon
+    QString rawName = reply->rawHeader("X-Mrpack-Name");
+    QString packName = QUrl::fromPercentEncoding(rawName.toUtf8());
+    QString packIcon = reply->rawHeader("X-Mrpack-Icon");
+
+    // Save to temp file
+    QTemporaryFile tmpFile(QDir::tempPath() + "/prismonline_update_XXXXXX.mrpack");
+    tmpFile.setAutoRemove(false);
+    if (!tmpFile.open()) {
+        QMessageBox::critical(this, tr("Error"), tr("Failed to create temporary file."));
+        reply->deleteLater();
+        nam->deleteLater();
+        return;
+    }
+    tmpFile.write(reply->readAll());
+    QString packPath = tmpFile.fileName();
+    tmpFile.close();
+
+    reply->deleteLater();
+    nam->deleteLater();
+
+    // Delete old instance
+    QString instId = m_selectedInstance->id();
+    APPLICATION->instances()->trashInstance(instId);
+    m_selectedInstance = nullptr;
+
+    // Import as new instance with same name/icon/key
+    auto* importTask = new InstanceImportTask(QUrl::fromLocalFile(packPath), this);
+    importTask->setPrismOnlineKey(key);
+    if (!packName.isEmpty()) {
+        importTask->setName(packName);
+    } else {
+        importTask->setName(oldName);
+    }
+    if (!packIcon.isEmpty()) {
+        importTask->setIcon(packIcon);
+    } else {
+        importTask->setIcon(oldIcon);
+    }
+
+    unique_qobject_ptr<Task> wrapped(APPLICATION->instances()->wrapInstanceTask(importTask));
+
+    ProgressDialog progDlg(this);
+    if (progDlg.execWithTask(wrapped.get()) == QDialog::Accepted) {
+        QMessageBox::information(this, tr("Updated"), tr("Pack \"%1\" updated successfully!").arg(packName.isEmpty() ? oldName : packName));
+    } else {
+        QMessageBox::warning(this, tr("Error"), tr("Failed to update pack."));
+    }
+
+    // Cleanup temp file
+    QFile::remove(packPath);
 }
 
 void MainWindow::on_actionExportInstanceMrPack_triggered()

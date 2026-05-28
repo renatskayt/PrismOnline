@@ -1,0 +1,207 @@
+msgctxt "ShareDialog"
+msgid "PrismOnline — Pack Sharing"
+msgstr "PrismOnline — Обмен сборками"
+
+msgctxt "ShareDialog"
+msgid "Push update to server (key: %1)"
+msgstr "Отправить обновление на сервер (ключ: %1)"
+
+msgctxt "ShareDialog"
+msgid "This instance has no PrismOnline key. Share it first."
+msgstr "У этой сборки нет ключа PrismOnline. Сначала опубликуйте её."
+
+msgctxt "ShareDialog"
+msgid "No instance selected for sharing."
+msgstr "Не выбрана сборка для публикации."
+
+msgctxt "ShareDialog"
+msgid "Error"
+msgstr "Ошибка"
+
+msgctxt "ShareDialog"
+msgid "Failed to create temporary file."
+msgstr "Не удалось создать временный файл."
+
+msgctxt "ShareDialog"
+msgid "Failed to read pack file."
+msgstr "Не удалось прочитать файл сборки."
+
+msgctxt "ShareDialog"
+msgid "Uploading pack to server..."
+msgstr "Загрузка сборки на сервер..."
+
+msgctxt "ShareDialog"
+msgid "This instance has no PrismOnline key. Share it first to get a key."
+msgstr "У этой сборки нет ключа PrismOnline. Сначала опубликуйте её."
+
+msgctxt "ShareDialog"
+msgid "Pushing update to server (key: %1)..."
+msgstr "Отправка обновления на сервер (ключ: %1)..."
+
+msgctxt "ShareDialog"
+msgid "Please enter a pack key."
+msgstr "Пожалуйста, введите ключ сборки."
+
+msgctxt "ShareDialog"
+msgid "Downloading pack..."
+msgstr "Скачивание сборки..."
+
+msgctxt "ShareDialog"
+msgid "Upload failed"
+msgstr "Загрузка не удалась"
+
+msgctxt "ShareDialog"
+msgid "Failed to upload pack to server:\n%1"
+msgstr "Не удалось загрузить сборку на сервер:\n%1"
+
+msgctxt "ShareDialog"
+msgid "Pack shared!"
+msgstr "Сборка опубликована!"
+
+msgctxt "ShareDialog"
+msgid "Pack Key"
+msgstr "Ключ сборки"
+
+msgctxt "ShareDialog"
+msgid "Pack uploaded successfully!\n\nShare this key with friends:\n\n%1\n\nKey is valid for %2 days."
+msgstr "Сборка успешно загружена!\n\nПоделитесь этим ключом с друзьями:\n\n%1\n\nКлюч действителен %2 дн."
+
+msgctxt "ShareDialog"
+msgid "Update failed"
+msgstr "Обновление не удалось"
+
+msgctxt "ShareDialog"
+msgid "Pack not found on server. The key may have expired."
+msgstr "Сборка не найдена на сервере. Возможно, ключ истёк."
+
+msgctxt "ShareDialog"
+msgid "Failed to push update to server:\n%1"
+msgstr "Не удалось отправить обновление на сервер:\n%1"
+
+msgctxt "ShareDialog"
+msgid "Pack updated!"
+msgstr "Сборка обновлена!"
+
+msgctxt "ShareDialog"
+msgid "Update Sent"
+msgstr "Обновление отправлено"
+
+msgctxt "ShareDialog"
+msgid "Pack update pushed successfully!\n\nKey: %1\n\nFriends with this key will get the update automatically."
+msgstr "Обновление сборки успешно отправлено!\n\nКлюч: %1\n\nИгроки с этим ключом получат обновление автоматически."
+
+msgctxt "ShareDialog"
+msgid "Pack not found. Check the key."
+msgstr "Сборка не найдена. Проверьте ключ."
+
+msgctxt "ShareDialog"
+msgid "Connection interrupted."
+msgstr "Соединение прервано."
+
+msgctxt "ShareDialog"
+msgid "Download error:\n%1"
+msgstr "Ошибка скачивания:\n%1"
+
+msgctxt "ShareDialog"
+msgid "Importing pack..."
+msgstr "Импорт сборки..."
+
+msgctxt "ShareDialog"
+msgid "Pack installed!"
+msgstr "Сборка установлена!"
+
+msgctxt "ShareDialog"
+msgid "Done"
+msgstr "Готово"
+
+msgctxt "ShareDialog"
+msgid "Pack imported successfully!\nIt will appear in the instance list."
+msgstr "Сборка успешно импортирована!\nОна появится в списке сборок."
+
+msgctxt "ShareDialog"
+msgid "Import failed"
+msgstr "Импорт не удался"
+
+msgctxt "ShareDialog"
+msgid "Select local instance to share:"
+msgstr "Выберите локальную сборку:"
+
+msgctxt "ShareDialog"
+msgid "Download shared pack by key:"
+msgstr "Скачать сборку по ключу:"
+
+msgctxt "ShareDialog"
+msgid "Share Pack"
+msgstr "Поделиться сборкой"
+
+msgctxt "ShareDialog"
+msgid "Push Update to Server"
+msgstr "Отправить изменения на сервер"
+
+msgctxt "ShareDialog"
+msgid "Enter key here"
+msgstr "Введите ключ"
+
+msgctxt "ShareDialog"
+msgid "Download & Import"
+msgstr "Скачать и импортировать"
+
+msgctxt "MainWindow"
+msgid "🔄 Update Pack"
+msgstr "🔄 Обновить сборку"
+
+msgctxt "MainWindow"
+msgid "Update Pack"
+msgstr "Обновить сборку"
+
+msgctxt "MainWindow"
+msgid "Update pack \"%1\"?\n\nKey: %2\n\nCurrent Minecraft data (mods, worlds, configs) will be replaced with the server version.\nSave important worlds before updating!"
+msgstr "Обновить сборку \"%1\"?\n\nКлюч: %2\n\nТекущие настройки Minecraft (моды, миры, конфиги) будут заменены на версию с сервера.\nСохраните важные миры перед обновлением!"
+
+msgctxt "MainWindow"
+msgid "Downloading updated pack..."
+msgstr "Скачивание обновлённой сборки..."
+
+msgctxt "MainWindow"
+msgid "Cancel"
+msgstr "Отмена"
+
+msgctxt "MainWindow"
+msgid "Pack not found on server. The key may have expired."
+msgstr "Сборка не найдена на сервере. Возможно, ключ истёк."
+
+msgctxt "MainWindow"
+msgid "Download cancelled."
+msgstr "Загрузка отменена."
+
+msgctxt "MainWindow"
+msgid "Download error:\n%1"
+msgstr "Ошибка скачивания:\n%1"
+
+msgctxt "MainWindow"
+msgid "Update Error"
+msgstr "Ошибка обновления"
+
+msgctxt "MainWindow"
+msgid "Failed to create temporary file."
+msgstr "Не удалось создать временный файл."
+
+msgctxt "MainWindow"
+msgid "Updated"
+msgstr "Обновлено"
+
+msgctxt "MainWindow"
+msgid "Pack \"%1\" updated successfully!"
+msgstr "Сборка \"%1\" успешно обновлена!"
+
+msgctxt "MainWindow"
+msgid "Failed to update pack."
+msgstr "Не удалось обновить сборку."
+
+msgctxt "MainWindow"
+msgid "Pack Sharing"
+msgstr "Обмен сборками"
+
+msgctxt "MainWindow"
+msgid "Share or download a modpack"
+msgstr "Поделиться или скачать сборку"
