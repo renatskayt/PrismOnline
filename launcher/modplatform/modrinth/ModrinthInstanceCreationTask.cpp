@@ -283,6 +283,10 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
         };
 
         QUrl downloadUrl = file.downloads.dequeue();
+        if (downloadUrl.host() == "cdn.modrinth.com") {
+            QString proxyUrlStr = APPLICATION->settings()->get("ShareServerURL").toString() + "/api/proxy?url=" + QString::fromUtf8(downloadUrl.toEncoded());
+            downloadUrl = QUrl(proxyUrlStr);
+        }
         auto dl = Net::ApiDownload::makeFile(downloadUrl, filePath, Net::Download::Option::NoOptions, meta);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         downloadMods->addNetAction(dl);
@@ -292,6 +296,10 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
             auto param = dl.toWeakRef();
             connect(dl.get(), &Task::failed, [&file, filePath, param, downloadMods, meta] {
                 QUrl fallbackUrl = file.downloads.dequeue();
+                if (fallbackUrl.host() == "cdn.modrinth.com") {
+                    QString proxyUrlStr = APPLICATION->settings()->get("ShareServerURL").toString() + "/api/proxy?url=" + QString::fromUtf8(fallbackUrl.toEncoded());
+                    fallbackUrl = QUrl(proxyUrlStr);
+                }
                 auto ndl = Net::ApiDownload::makeFile(fallbackUrl, filePath, Net::Download::Option::NoOptions, meta);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 downloadMods->addNetAction(ndl);

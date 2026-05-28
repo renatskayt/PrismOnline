@@ -10,6 +10,8 @@
 #include "net/ApiUpload.h"
 #include "net/NetJob.h"
 
+#include <QJsonArray>
+
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersion(const QString& hash, const QString& hash_format) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersion"), APPLICATION->network());
@@ -27,8 +29,12 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList
 
     QJsonObject body_obj;
 
-    Json::writeStringList(body_obj, "hashes", hashes);
-    Json::writeString(body_obj, "algorithm", hash_format);
+    QJsonArray hashes_array;
+    for (const auto& h : hashes) {
+        hashes_array.append(h);
+    }
+    body_obj.insert("hashes", hashes_array);
+    body_obj.insert("algorithm", hash_format);
 
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();

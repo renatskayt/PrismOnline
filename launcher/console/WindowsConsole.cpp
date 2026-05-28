@@ -24,7 +24,7 @@
 #endif
 #include <windows.h>
 
-#include <consoleapi.h>
+#include <wincon.h>
 #include <fcntl.h>
 #include <fileapi.h>
 #include <io.h>

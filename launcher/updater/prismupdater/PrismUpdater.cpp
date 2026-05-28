@@ -517,7 +517,7 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
 
     if (file_list.isEmpty()) {
         logUpdate(tr("Manifest empty, making best guess of the directory contents of %1").arg(m_rootPath));
-        auto entries = target.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
+        auto entries = app_dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
         for (auto entry : entries) {
             file_list.append(entry.fileName());
         }

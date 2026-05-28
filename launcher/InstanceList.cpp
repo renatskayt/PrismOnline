@@ -57,6 +57,7 @@
 #include "WatchLock.h"
 #include "minecraft/MinecraftInstance.h"
 #include "settings/INISettingsObject.h"
+#include "settings/INIFile.h"
 
 #ifdef Q_OS_WIN32
 #include <windows.h>
@@ -1061,6 +1062,15 @@ bool InstanceList::commitStagedInstance(const QString& path,
 
             m_instanceGroupIndex[instID] = groupName;
             increaseGroupCount(groupName);
+        }
+
+        if (!commiting.getPrismOnlineKey().isEmpty()) {
+            QString configPath = FS::PathCombine(destination, "instance.cfg");
+            INIFile ini;
+            ini.loadFile(configPath);
+            ini.remove("UI/PrismOnlineKey");  // remove misplaced key if present
+            ini.set("PrismOnlineKey", commiting.getPrismOnlineKey());
+            ini.saveFile(configPath);
         }
 
         instanceSet.insert(instID);
